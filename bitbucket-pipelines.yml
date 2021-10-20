@@ -1,0 +1,30 @@
+image: sleavely/node-awscli:14.x
+
+stepdefinitions:
+  - buildandtest: &buildandtest
+        name: Build and test
+        caches:
+          - node
+        script:
+          - npm run npm:auth
+          - npm install
+          - npm test
+        artifacts:
+          - node_modules/**
+
+  - publish: &publish
+        name: Build and publish
+        trigger: manual
+        deployment: production
+        script:
+          - npm run npm:auth
+          - npm run build
+          - npm run publish:package
+
+pipelines:
+  branches:
+    master:
+        - step: *buildandtest
+        - step: *publish
+  default:
+    - step: *buildandtest
