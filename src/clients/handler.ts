@@ -24,6 +24,7 @@ export class HandlerHelper {
   private accessControlAllowOrigin: string
   private defaultHeaders: Headers
   private logger: Logger
+  private loggingEnabled: boolean = true
 
   constructor (params: HandlerHelperParams) {
     this.accessControlAllowOrigin = params.accessControlAllowOrigin || '*'
@@ -31,6 +32,18 @@ export class HandlerHelper {
       ...params.defaultHeaders
     }
     this.logger = params.logger
+  }
+
+  public disableLogging (): void {
+    this.loggingEnabled = false
+  }
+
+  public enableLogging (): void {
+    this.loggingEnabled = true
+  }
+
+  public getLoggingStatus (): boolean {
+    return this.loggingEnabled
   }
 
   public getAccessControlAllowOriginHeader (): string {
@@ -81,11 +94,15 @@ export class HandlerHelper {
   }
 
   public handleError<T> (err: HandlerError<T> | Error, fallbackMessage: string): HandlerResponse {
-    this.logger.warn(err)
+    if (this.getLoggingStatus()) {
+      this.logger.warn(err)
+    }
     if ('statusCode' in err) {
       return this.buildCustomHandlerResponse(err.statusCode, err.body)
     }
-    this.logger.error(fallbackMessage)
+    if (this.getLoggingStatus()) {
+      this.logger.error(fallbackMessage)
+    }
     return this.serverError('Something went wrong')
   }
 }
