@@ -1,5 +1,5 @@
 {
-  "name": "@enfoi/Enfo NPM Package",
+  "name": "@enfo/rename-me",
   "version": "0.0.1",
   "description": "A fleshed out typescript NPM package template",
   "main": "index.js",
@@ -11,17 +11,16 @@
     "build": "npx webpack",
     "test": "npx jest --runInBand",
     "lint": "npx eslint 'src/**/*.ts' 'test/**/*.ts'",
-    "lint:fix": "npx eslint --fix 'src/**/*.ts' 'test/**/*.ts'",
-    "npm:auth": "aws codeartifact login --tool npm --repository enfo-internal --domain enfo-code-packages --domain-owner 513331674214 --namespace enfoi --region eu-west-1"
+    "lint:fix": "npx eslint --fix 'src/**/*.ts' 'test/**/*.ts'"
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@bitbucket.org/enfogroupcloud/Enfo NPM Package.git"
+    "url": "https://github.com/enfogroup/rename-me.git"
   },
   "keywords": [],
-  "author": "Marvin Team",
-  "license": "ISC",
-  "homepage": "https://bitbucket.org/enfogroupcloud/Enfo NPM Package#readme",
+  "author": "Urban Pettersson",
+  "license": "MIT",
+  "homepage": "https://github.com/enfogroup/rename-me#readme",
   "devDependencies": {
     "@commitlint/cli": "^13.2.0",
     "@commitlint/config-conventional": "^13.2.0",
