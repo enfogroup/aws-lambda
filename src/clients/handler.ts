@@ -58,7 +58,7 @@ export class HandlerHelper {
     try {
       return JSON.parse(body) as T
     } catch (err) {
-      throw new HandlerError('a', STATUS.BAD_REQUEST)
+      throw new HandlerError({ statusCode: STATUS.BAD_REQUEST })
     }
   }
 
@@ -66,7 +66,7 @@ export class HandlerHelper {
     try {
       return JSON.parse(body) as RecursivePartial<T>
     } catch (err) {
-      throw new HandlerError('a', STATUS.BAD_REQUEST)
+      throw new HandlerError({ statusCode: STATUS.BAD_REQUEST })
     }
   }
 
@@ -98,7 +98,7 @@ export class HandlerHelper {
       this.logger.warn(err)
     }
     if ('statusCode' in err) {
-      return this.buildCustomHandlerResponse(err.statusCode, err.body)
+      return this.buildCustomHandlerResponse(err.statusCode, err.body, err.headers)
     }
     if (this.getLoggingStatus()) {
       this.logger.error(fallbackMessage)
