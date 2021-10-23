@@ -5,7 +5,7 @@ import { HandlerResponse, Headers } from '@models/handler'
 import { STATUS } from '@models/http'
 import { Logger } from '@models/logger'
 
-export interface HandlerHelperParams {
+export interface APIGatewayHelperParams {
   /**
    * Access-Control-Allow-Origin header. Defaults to '*'
    */
@@ -20,13 +20,13 @@ export interface HandlerHelperParams {
   logger: Logger;
 }
 
-export class HandlerHelper {
+export class APIGatewayHelper {
   private accessControlAllowOrigin: string
   private defaultHeaders: Headers
   private logger: Logger
   private loggingEnabled: boolean = true
 
-  constructor (params: HandlerHelperParams) {
+  constructor (params: APIGatewayHelperParams) {
     this.accessControlAllowOrigin = params.accessControlAllowOrigin || '*'
     this.defaultHeaders = {
       ...params.defaultHeaders

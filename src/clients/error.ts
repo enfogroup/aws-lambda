@@ -25,7 +25,7 @@ export interface HandlerErrorParams<T> {
 
 /**
  * Custom Error to be throw from within any part of the lambda flow.
- * The error should be caught and handled using HandlerHelper.handleError
+ * The error should be caught and handled using APIGatewayHelper.handleError
  */
 export class HandlerError<T> extends Error {
   public readonly statusCode: STATUS;
