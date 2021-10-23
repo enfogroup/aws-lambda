@@ -47,4 +47,28 @@ describe('APIGatewayHelper', () => {
       expect(output).toEqual('banana')
     })
   })
+
+  describe('getDefaultHeaders', () => {
+    it('should return only accessControlAllowOrigin if not specified in the constructor', () => {
+      const instance = new APIGatewayHelper({ logger })
+
+      const output = instance.getDefaultHeaders()
+
+      expect(output).toEqual({
+        accessControlAllowOrigin: '*'
+      })
+    })
+
+    it('should return accessControlAllowOrigin and all headers specified in constructor', () => {
+      const instance = new APIGatewayHelper({ logger, defaultHeaders: { a: '42', b: 'answer' } })
+
+      const output = instance.getDefaultHeaders()
+
+      expect(output).toEqual({
+        accessControlAllowOrigin: '*',
+        a: '42',
+        b: 'answer'
+      })
+    })
+  })
 })

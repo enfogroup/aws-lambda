@@ -56,7 +56,10 @@ export class APIGatewayHelper {
   }
 
   public getDefaultHeaders (): Headers {
-    return this.defaultHeaders
+    return {
+      ...this.defaultHeaders,
+      accessControlAllowOrigin: this.accessControlAllowOrigin
+    }
   }
 
   public parseJSONBody<T> (body: string): T {
