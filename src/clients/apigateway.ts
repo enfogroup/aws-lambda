@@ -115,7 +115,8 @@ export class APIGatewayHelper {
     const { logic, fallbackMessage } = params
     try {
       return await logic()
-    } catch (err) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
       return this.handleError(err, fallbackMessage)
     }
   }

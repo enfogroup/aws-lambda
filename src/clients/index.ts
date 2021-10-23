@@ -1,3 +1,3 @@
 // istanbul ignore file
-export * from './handler'
+export * from './apigateway'
 export * from './error'
