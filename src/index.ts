@@ -1,3 +1,3 @@
 // istanbul ignore file
 export * from './models'
-export * from './clients/dummy'
+export * from './clients'
