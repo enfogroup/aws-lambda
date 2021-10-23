@@ -20,6 +20,11 @@ export interface APIGatewayHelperParams {
   logger: Logger;
 }
 
+export interface WrapLogicParameters {
+  logic: () => Promise<HandlerResponse>;
+  fallbackMessage: string;
+}
+
 export class APIGatewayHelper {
   private accessControlAllowOrigin: string
   private defaultHeaders: Headers
@@ -104,5 +109,14 @@ export class APIGatewayHelper {
       this.logger.error(fallbackMessage)
     }
     return this.serverError('Something went wrong')
+  }
+
+  public async wrapLogic (params: WrapLogicParameters): Promise<HandlerResponse> {
+    const { logic, fallbackMessage } = params
+    try {
+      return await logic()
+    } catch (err) {
+      return this.handleError(err, fallbackMessage)
+    }
   }
 }
