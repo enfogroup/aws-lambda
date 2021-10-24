@@ -62,7 +62,7 @@ export class APIGatewayHelper {
     }
   }
 
-  public parseJSON<T> (body?: string): T {
+  private _parseJSON<T> (body?: string): T {
     if (!body) {
       throw new HandlerError({ message: 'No input supplied for JSON parsing', statusCode: STATUS.BAD_REQUEST })
     }
@@ -73,15 +73,12 @@ export class APIGatewayHelper {
     }
   }
 
+  public parseJSON<T> (body?: string): T {
+    return this._parseJSON<T>(body)
+  }
+
   public parseJSONAsPartial<T> (body?: string): RecursivePartial<T> {
-    if (!body) {
-      throw new HandlerError({ message: 'No input supplied for JSON parsing', statusCode: STATUS.BAD_REQUEST })
-    }
-    try {
-      return JSON.parse(body) as RecursivePartial<T>
-    } catch (err) {
-      throw new HandlerError({ message: 'Input could be not be parsed as JSON', statusCode: STATUS.BAD_REQUEST })
-    }
+    return this._parseJSON<RecursivePartial<T>>(body)
   }
 
   private buildCustomHandlerResponse<T> (statusCode: STATUS, body?: T, headers?: Headers): HandlerResponse {
