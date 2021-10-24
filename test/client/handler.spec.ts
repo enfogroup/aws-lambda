@@ -4,6 +4,8 @@ import { APIGatewayHelper } from '@clients/apigateway'
 // models
 import { Logger } from '@models/logger'
 import { STATUS } from '@models/http'
+import { HandlerError } from '@clients/error'
+import { checkAllMocksCalled } from '@test/tools'
 
 describe('APIGatewayHelper', () => {
   const logger: Logger = {
@@ -198,6 +200,86 @@ describe('APIGatewayHelper', () => {
       expect(output).toMatchObject({
         statusCode: STATUS.INTERNAL_SERVER_ERROR
       })
+    })
+  })
+
+  describe('handleError', () => {
+    const instance = new APIGatewayHelper({ logger })
+    it('should return a response with data from the HandlerError', () => {
+      const err = new HandlerError({ statusCode: STATUS.IM_A_TEAPOT, body: 'banana', headers: { a: 'b' } })
+
+      const output = instance.handleError(err, 'Log me')
+
+      expect(output).toMatchObject({
+        statusCode: STATUS.IM_A_TEAPOT,
+        body: 'banana',
+        headers: {
+          a: 'b'
+        }
+      })
+    })
+
+    it('should return the default error response', () => {
+      const output = instance.handleError(new Error(), 'Log me')
+
+      expect(output).toMatchObject({
+        statusCode: STATUS.INTERNAL_SERVER_ERROR,
+        body: instance.getDefaultServerError()
+      })
+    })
+
+    it('should log warning when processing a HandlerError', () => {
+      const warnMock = jest.fn()
+      const errorMock = jest.fn()
+      const logger: Logger = {
+        warn: warnMock,
+        error: errorMock
+      }
+      const instance = new APIGatewayHelper({ logger })
+      const err = new HandlerError({ statusCode: STATUS.IM_A_TEAPOT })
+
+      const output = instance.handleError(err, 'Log me')
+
+      expect(output).toMatchObject({
+        statusCode: STATUS.IM_A_TEAPOT
+      })
+      checkAllMocksCalled([warnMock], 1)
+      checkAllMocksCalled([errorMock], 0)
+    })
+
+    it('should log warning and Error when processing an unknown Error', () => {
+      const warnMock = jest.fn()
+      const errorMock = jest.fn()
+      const logger: Logger = {
+        warn: warnMock,
+        error: errorMock
+      }
+      const instance = new APIGatewayHelper({ logger })
+
+      const output = instance.handleError(new Error(), 'Log me')
+
+      expect(output).toMatchObject({
+        statusCode: STATUS.INTERNAL_SERVER_ERROR
+      })
+      checkAllMocksCalled([warnMock, errorMock], 1)
+    })
+
+    it('should log nothing when logging is disabled', () => {
+      const warnMock = jest.fn()
+      const errorMock = jest.fn()
+      const logger: Logger = {
+        warn: warnMock,
+        error: errorMock
+      }
+      const instance = new APIGatewayHelper({ logger })
+      instance.disableLogging()
+
+      const output = instance.handleError(new Error(), 'Log me')
+
+      expect(output).toMatchObject({
+        statusCode: STATUS.INTERNAL_SERVER_ERROR
+      })
+      checkAllMocksCalled([warnMock, errorMock], 0)
     })
   })
 })

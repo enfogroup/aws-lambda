@@ -30,6 +30,7 @@ export class APIGatewayHelper {
   private defaultHeaders: Headers
   private logger: Logger
   private loggingEnabled: boolean = true
+  private defaultServerError: string | object
 
   constructor (params: APIGatewayHelperParams) {
     this.accessControlAllowOrigin = params.accessControlAllowOrigin || '*'
@@ -37,6 +38,7 @@ export class APIGatewayHelper {
       ...params.defaultHeaders
     }
     this.logger = params.logger
+    this.defaultServerError = 'Something went wrong'
   }
 
   public disableLogging (): void {
@@ -104,6 +106,10 @@ export class APIGatewayHelper {
     return this.buildCustomResponse(STATUS.INTERNAL_SERVER_ERROR, body, headers)
   }
 
+  public getDefaultServerError () {
+    return this.defaultServerError
+  }
+
   public handleError<T> (err: HandlerError<T> | Error, fallbackMessage: string): HandlerResponse {
     if (this.getLoggingStatus()) {
       this.logger.warn(err)
@@ -114,7 +120,7 @@ export class APIGatewayHelper {
     if (this.getLoggingStatus()) {
       this.logger.error(fallbackMessage)
     }
-    return this.serverError('Something went wrong')
+    return this.serverError(this.getDefaultServerError())
   }
 
   public async wrapLogic (params: WrapLogicParameters): Promise<HandlerResponse> {
