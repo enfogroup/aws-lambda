@@ -1,41 +1,179 @@
 # Introduction
 
-This is a fleshed out typescript NPM package template. If you have just created a new repository using this template you should read this README and then update it to contain information about your package.
+This package exposes functionality related to simplifying the process of working with AWS Lambda and API Gateway. In particular the response flow.
 
-Have fun!
+## Installation
 
-## Quick start
+```bash
+npm install @enfo/aws-lambda --save
+```
 
-Update the contents of src to contain your desired code. Write unit tests. Commit and run the manual trigger on the pipeline. Done! You will have to manually maintain control of versions between publications.
+## Purpose of package
 
-## Features
+This package aims to simplify the response flow in an AWS Lambda invoked by API Gateway. It exposes functionality that allows for default responses, easy throwing from anywhere within your business logic and handling of those thrown errors.
 
-* Pre-configured to work immediately in Bitbucket pipelines
-* Husky hooks enforcing work flows
-* Commit lint enforcing commit message format
-* Linting using [ESLint](https://www.npmjs.com/package/eslint) and [ESLint Standard](https://www.npmjs.com/package/eslint-config-standard) configuration
-* Ready to use build script using [Webpack](https://webpack.js.org/)
-* Testing using [Jest](https://jestjs.io/)
+## HandlerError
 
-## Explanation of installed packages
+HandlerError is an extension of Error. It should be thrown whenever you want a response in your code which is not a part of the happy path. If you for example fail to find a resource you can simply throw a new HandlerError with status code 404. Or if the invoker does not have access to a resource you can return a 403 with a specific message.
 
-* @commitlint/* Enforces commit message format
-* @types/node Fixes error message that will otherwise show up in tsconfig, also useful when coding
-* @typescript/* and eslint* Used for linting
-* husky Adds support for git hooks which can run pre-commit and pre-push
-* jest and ts-jest Used for testing
-* typescript Hopefully obvious. Locked at 3.9.7 to resolve a typescript path problem.
-* webpack* Used for building
-* ts-loader Used to load typescript in webpack
-* dotenv-webpack Used to read .env file and adding variables to code. This should only be used for non-sensitive things such as urls.
-* tsconfig-paths-webpack-plugin Used to handle typescript paths in Webpack
-* copy-webpack-plugin Used to copy package.json and README.MD to output folder
-* ttypescript and typescript-transform-paths Used to transform typescript paths in declarations file output
+```typescript
+import { HandlerError, STATUS } from '@enfo/aws-lambda'
 
-## Notes on testing
+new HandlerError<string>({
+  statusCode: STATUS.NOT_FOUND, // HTTP status code to return to invoker
+  body: 'Unable to find resource', // Optional body to include in response
+  headers: { // Optional headers to include in response
+    'my-header': 'cool-value'
+  }
+})
+```
 
-The Jest configuration is setup to allow traffic over the Internet. The main purpose of this is to allow integration tests in case you are writing an SDK for an API or similar. The configuration is also set to require 100 percent coverage on all metrics. Please respect this when writing a package as it will make life easier for anyone wanting to contribute.
+## APIGatewayHelper
 
-## Contributing
+APIGatewayHelper is the main class in this package. It exposes methods for setting default headers, responses, parsing JSON and most importantly executing your business logic in an error handling wrapper.
 
-Create a pull request and make sure your test coverage is 100 percent.
+```typescript
+import { APIGatewayHelper } from '@enfo/aws-lambda'
+import logger from '@enfo/logger'
+
+const helper = new APIGatewayHelper({
+  accessControlAllowOrigin: 'myOrigin', // optional accessControlAllowOrigin header, defaults to '*'
+  defaultHeaders: { // optional headers to include in ALL responses
+    key: 'value'
+  },
+  logger: logger // optional logger used to log when errors occur
+})
+```
+
+### Methods
+
+* getAccessControlAllowOriginHeader - returns accessControlAllowOrigin header value
+* getDefaultHeaders - returns default headers used in every response
+* setFallbackError - used to set HandlerError used when something goes unintentionally wrong. Used by handleError and wrapLogic
+* setJSONParseFailError - used to set HandlerError thrown when parsing of JSON fails due to a bad string. Used by parseJSON and parseJSONAsPartial
+* setJSONParseFailError - used to set HandlerError thrown when input to parseJSON and parseJSONAsPartial is empty
+* parseJSON<T> - used to parse a string to T
+* parseJSONAsPartial<T> used to parse a string to RecursivePartial<T>. RecursivePartial is a type which makes every key in object optional. The main purpose of this function is to return a more realistic payload value which can then be used in validation using for example [joi](https://www.npmjs.com/package/joi)
+* buildCustomResponse - builds a custom response. Set http status code, body and headers
+* ok - returns a status 200 response. Set body and headers
+* clientError - returns a status 400 response. Set body and headers
+* serverError - returns a status 500 response. Set body and headers
+* handleError - takes a HandlerError or Error and returns a response. In the case of a regular Error it will attempt to log it using the logger provided in the constructor. In the case of a HandlerError it will be used to build the response
+* wrapLogic - takes a business logic function, executes it while handling errors that might occur
+
+## Examples
+
+Simple use
+
+```typescript
+import { APIGatewayHelper, HandlerError, STATUS } from '@enfo/aws-lambda'
+import logger from '@enfo/logger'
+
+const helper = new APIGatewayHelper({
+  accessControlAllowOrigin: 'myOrigin', // optional accessControlAllowOrigin header, defaults to '*'
+  defaultHeaders: { // optional headers to include in ALL responses
+    key: 'value'
+  },
+  logger: logger // optional logger used to log when errors occur
+})
+
+const handlerOne = async (event: AWSLambda.APIGatewayProxyEvent) => { // interface from @types/aws-lambda
+  return helper.wrapLogic({
+    errorMessage: 'Something went wrong in lambda X',
+    logic: async () => {
+      return ok<string>('Everything went fine!')
+    }
+  })
+}
+
+const handlerTwo = async (event: AWSLambda.APIGatewayProxyEvent) => {
+  return helper.wrapLogic({
+    errorMessage: 'Something went wrong in lambda Y',
+    logic: async () => {
+      const body = helper.parseJSON<{a: string}>(event.body) // will throw if something is wrong with the body, which will be handled by the wrapper
+      return helper.buildCustomResponse(STATUS.ACCEPTED)
+    }
+  })
+}
+
+const handlerThree = async (event: AWSLambda.APIGatewayProxyEvent) => {
+  return helper.wrapLogic({
+    errorMessage: 'Something went wrong in lambda Z',
+    logic: async () => {
+      throw new HandlerError<string>({
+        statusCode: STATUS.NOT_FOUND,
+        body: 'Unable to find resource'
+      })
+    }
+  })
+}
+```
+
+Customizing error responses. Let us start by creating an APIGatewayHelper
+
+```typescript
+import { APIGatewayHelper, HandlerError, STATUS } from '@enfo/aws-lambda'
+import logger from '@enfo/logger'
+
+const helper = new APIGatewayHelper({
+  accessControlAllowOrigin: 'myOrigin', // optional accessControlAllowOrigin header, defaults to '*'
+  defaultHeaders: { // optional headers to include in ALL responses
+    key: 'value'
+  },
+  logger: logger // optional logger used to log when errors occur
+})
+```
+
+Let us modify the JSONParseFailError and then use it. The response to the invoker will be status 400 and the object specified in the body
+
+```typescript
+helper.setJSONParseFailError(new HandlerError({
+  statusCode: STATUS.BAD_REQUEST,
+  body: {
+    message: 'Body in payload was not proper JSON'
+  }
+}))
+
+const handlerOne = async (event: AWSLambda.APIGatewayProxyEvent) => {
+  return helper.wrapLogic({
+    errorMessage: 'Something went wrong in lambda X',
+    logic: async () => {
+      helper.parseJSON('broken[}')
+      return helper.ok<string>('Everything went fine!')
+    }
+  })
+}
+```
+
+Now, let us have a look at modifying the fallback response. This response gets used whenever a regular Error gets thrown.
+
+```typescript
+helper.setFallbackError(new HandlerError({
+  statusCode: STATUS.INTERNAL_SERVER_ERROR,
+  body: {
+    message: 'Something went catastrophically wrong processing your request, I am sorry'
+  }
+}))
+
+const handlerTwo = async (event: AWSLambda.APIGatewayProxyEvent) => {
+  return helper.wrapLogic({
+    errorMessage: 'Something went wrong in lambda X',
+    logic: async () => {
+      throw new Error()
+    }
+  })
+}
+```
+
+If you want to you can always use the building blocks to handle thrown errors on your own. The code you see below is essentially what wrapLogic does behind the scenes.
+
+```typescript
+const handlerThree = async (event: AWSLambda.APIGatewayProxyEvent) => {
+  try{
+    const body = helper.parseJSON(event.body)
+    return helper.ok<string>(await doStuff(body))
+  }catch(err){
+    return helper.handleError(err, 'Something went wrong in lambda X')
+  }
+}
+```
