@@ -22,7 +22,7 @@ export interface APIGatewayHelperParams {
 
 export interface WrapLogicParameters {
   logic: () => Promise<HandlerResponse>;
-  fallbackMessage: string;
+  errorMessage: string;
 }
 
 export class APIGatewayHelper {
@@ -113,22 +113,22 @@ export class APIGatewayHelper {
     this.logger.error(err)
   }
 
-  public handleError<T> (err: HandlerError<T> | Error, fallbackMessage: string): HandlerResponse {
+  public handleError<T> (err: HandlerError<T> | Error, errorMessage: string): HandlerResponse {
     this.logWarning(err)
     if ('statusCode' in err) {
       return this.buildCustomResponse(err.statusCode, err.body, err.headers)
     }
-    this.logError(fallbackMessage)
+    this.logError(errorMessage)
     return this.serverError(this.getDefaultServerError())
   }
 
   public async wrapLogic (params: WrapLogicParameters): Promise<HandlerResponse> {
-    const { logic, fallbackMessage } = params
+    const { logic, errorMessage } = params
     try {
       return await logic()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      return this.handleError(err, fallbackMessage)
+      return this.handleError(err, errorMessage)
     }
   }
 }
