@@ -81,7 +81,7 @@ export class APIGatewayHelper {
     return this._parseJSON<RecursivePartial<T>>(body)
   }
 
-  public buildCustomHandlerResponse<T> (statusCode: STATUS, body?: T, headers?: Headers): HandlerResponse {
+  public buildCustomResponse<T> (statusCode: STATUS, body?: T, headers?: Headers): HandlerResponse {
     return {
       statusCode,
       body: typeof body === 'string' ? body : JSON.stringify(body),
@@ -93,15 +93,15 @@ export class APIGatewayHelper {
   }
 
   public ok<T> (body?: T, headers?: Headers) {
-    return this.buildCustomHandlerResponse(STATUS.OK, body, headers)
+    return this.buildCustomResponse(STATUS.OK, body, headers)
   }
 
   public clientError<T> (body?: T, headers?: Headers) {
-    return this.buildCustomHandlerResponse(STATUS.BAD_REQUEST, body, headers)
+    return this.buildCustomResponse(STATUS.BAD_REQUEST, body, headers)
   }
 
   public serverError<T> (body?: T, headers?: Headers) {
-    return this.buildCustomHandlerResponse(STATUS.INTERNAL_SERVER_ERROR, body, headers)
+    return this.buildCustomResponse(STATUS.INTERNAL_SERVER_ERROR, body, headers)
   }
 
   public handleError<T> (err: HandlerError<T> | Error, fallbackMessage: string): HandlerResponse {
@@ -109,7 +109,7 @@ export class APIGatewayHelper {
       this.logger.warn(err)
     }
     if ('statusCode' in err) {
-      return this.buildCustomHandlerResponse(err.statusCode, err.body, err.headers)
+      return this.buildCustomResponse(err.statusCode, err.body, err.headers)
     }
     if (this.getLoggingStatus()) {
       this.logger.error(fallbackMessage)

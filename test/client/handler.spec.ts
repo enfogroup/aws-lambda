@@ -115,14 +115,14 @@ describe('APIGatewayHelper', () => {
     })
   })
 
-  describe('buildCustomHandlerResponse', () => {
+  describe('buildCustomResponse', () => {
     const instance = new APIGatewayHelper({ logger })
     it('should return a custom response', () => {
       const input: Data = {
         a: 4711
       }
 
-      const output = instance.buildCustomHandlerResponse<Data>(STATUS.ACCEPTED, input)
+      const output = instance.buildCustomResponse<Data>(STATUS.ACCEPTED, input)
 
       expect(output).toMatchObject({
         statusCode: STATUS.ACCEPTED,
@@ -131,7 +131,7 @@ describe('APIGatewayHelper', () => {
     })
 
     it('should handle string body', () => {
-      const output = instance.buildCustomHandlerResponse<string>(STATUS.OK, 'banana')
+      const output = instance.buildCustomResponse<string>(STATUS.OK, 'banana')
 
       expect(output).toMatchObject({
         statusCode: STATUS.OK,
@@ -140,7 +140,7 @@ describe('APIGatewayHelper', () => {
     })
 
     it('should handle no body being provided', () => {
-      const output = instance.buildCustomHandlerResponse(STATUS.NO_CONTENT)
+      const output = instance.buildCustomResponse(STATUS.NO_CONTENT)
 
       expect(output).toMatchObject({
         statusCode: STATUS.NO_CONTENT,
@@ -153,7 +153,7 @@ describe('APIGatewayHelper', () => {
         a: 4711
       }
 
-      const output = instance.buildCustomHandlerResponse<Data>(STATUS.ACCEPTED, input, { key: 'value' })
+      const output = instance.buildCustomResponse<Data>(STATUS.ACCEPTED, input, { key: 'value' })
 
       expect(output).toMatchObject({
         statusCode: STATUS.ACCEPTED,
