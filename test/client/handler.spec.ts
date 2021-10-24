@@ -72,7 +72,7 @@ describe('APIGatewayHelper', () => {
     })
 
     it('should throw if the input could not be parsed', () => {
-      expect(() => instance.parseJSON<Data>('banana:{}')).toThrow('Input could be not be parsed as JSON')
+      expect(() => instance.parseJSON<Data>('banana:{}')).toThrow('Input could not be parsed as JSON')
     })
   })
 
@@ -91,7 +91,7 @@ describe('APIGatewayHelper', () => {
     })
 
     it('should throw if the input could not be parsed', () => {
-      expect(() => instance.parseJSONAsPartial<Data>('banana:{}')).toThrow('Input could be not be parsed as JSON')
+      expect(() => instance.parseJSONAsPartial<Data>('banana:{}')).toThrow('Input could not be parsed as JSON')
     })
   })
 
@@ -197,12 +197,12 @@ describe('APIGatewayHelper', () => {
       })
     })
 
-    it('should return the default error response', () => {
+    it('should return the fallback response', () => {
       const output = instance.handleError(new Error(), 'Log me')
 
       expect(output).toMatchObject({
         statusCode: STATUS.INTERNAL_SERVER_ERROR,
-        body: instance.getDefaultServerError()
+        body: 'Something went wrong'
       })
     })
 
@@ -250,7 +250,7 @@ describe('APIGatewayHelper', () => {
         return Promise.resolve(instance.ok())
       }
 
-      const output = await instance.wrapLogic({ logic, fallbackMessage: 'message' })
+      const output = await instance.wrapLogic({ logic, errorMessage: 'message' })
 
       expect(output).toMatchObject({
         statusCode: STATUS.OK
@@ -269,7 +269,7 @@ describe('APIGatewayHelper', () => {
         })
       }
 
-      const output = await instance.wrapLogic({ logic, fallbackMessage: 'message' })
+      const output = await instance.wrapLogic({ logic, errorMessage: 'message' })
 
       expect(output).toMatchObject({
         statusCode: STATUS.NOT_FOUND,
@@ -277,6 +277,68 @@ describe('APIGatewayHelper', () => {
         headers: {
           key: 'value'
         }
+      })
+    })
+  })
+
+  describe('customization', () => {
+    const instance = new APIGatewayHelper({})
+    it('should allow setting of JSON parse response', async () => {
+      instance.setJSONParseFailResponse(new HandlerError({
+        statusCode: STATUS.IM_A_TEAPOT,
+        body: 'Well this went bad'
+      }))
+
+      const output = await instance.wrapLogic({
+        errorMessage: '',
+        logic: async () => {
+          instance.parseJSON('nope[]')
+          return instance.ok()
+        }
+      })
+
+      expect(output).toMatchObject({
+        statusCode: STATUS.IM_A_TEAPOT,
+        body: 'Well this went bad'
+      })
+    })
+
+    it('should allow setting of JSON no body response', async () => {
+      instance.setJSONNoBodyResponse(new HandlerError({
+        statusCode: STATUS.NOT_FOUND,
+        body: 'No body'
+      }))
+
+      const output = await instance.wrapLogic({
+        errorMessage: '',
+        logic: async () => {
+          instance.parseJSON()
+          return instance.ok()
+        }
+      })
+
+      expect(output).toMatchObject({
+        statusCode: STATUS.NOT_FOUND,
+        body: 'No body'
+      })
+    })
+
+    it('should allow setting of fallback response', async () => {
+      instance.setFallbackResponse(new HandlerError({
+        statusCode: STATUS.BAD_GATEWAY,
+        body: 'Fallback'
+      }))
+
+      const output = await instance.wrapLogic({
+        errorMessage: '',
+        logic: async () => {
+          throw new Error()
+        }
+      })
+
+      expect(output).toMatchObject({
+        statusCode: STATUS.BAD_GATEWAY,
+        body: 'Fallback'
       })
     })
   })

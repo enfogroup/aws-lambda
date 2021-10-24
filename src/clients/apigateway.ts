@@ -29,7 +29,12 @@ export class APIGatewayHelper {
   private accessControlAllowOrigin: string
   private defaultHeaders: Headers
   private logger: Logger | undefined
-  private defaultServerError: string | object
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private defaultJSONParseFailResponse: HandlerError<any>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private defaultJSONParseNoBodyResponse: HandlerError<any>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private fallbackResponse: HandlerError<any>
 
   constructor (params: APIGatewayHelperParams) {
     this.accessControlAllowOrigin = params.accessControlAllowOrigin || '*'
@@ -37,7 +42,21 @@ export class APIGatewayHelper {
       ...params.defaultHeaders
     }
     this.logger = params.logger
-    this.defaultServerError = 'Something went wrong'
+    this.defaultJSONParseFailResponse = new HandlerError({
+      message: 'Input could not be parsed as JSON',
+      statusCode: STATUS.BAD_REQUEST,
+      body: 'Input could not be parsed as JSON'
+    })
+    this.defaultJSONParseNoBodyResponse = new HandlerError({
+      message: 'No input supplied for JSON parsing',
+      statusCode: STATUS.BAD_REQUEST,
+      body: 'No input supplied for JSON parsing'
+    })
+    this.fallbackResponse = new HandlerError({
+      message: 'Something went wrong',
+      statusCode: STATUS.INTERNAL_SERVER_ERROR,
+      body: 'Something went wrong'
+    })
   }
 
   public getAccessControlAllowOriginHeader (): string {
@@ -51,14 +70,26 @@ export class APIGatewayHelper {
     }
   }
 
+  public setFallbackResponse<T> (err: HandlerError<T>): void {
+    this.fallbackResponse = err
+  }
+
+  public setJSONParseFailResponse<T> (err: HandlerError<T>): void {
+    this.defaultJSONParseFailResponse = err
+  }
+
+  public setJSONNoBodyResponse<T> (err: HandlerError<T>): void {
+    this.defaultJSONParseNoBodyResponse = err
+  }
+
   private _parseJSON<T> (body?: string): T {
     if (!body) {
-      throw new HandlerError({ message: 'No input supplied for JSON parsing', statusCode: STATUS.BAD_REQUEST })
+      throw this.defaultJSONParseNoBodyResponse
     }
     try {
       return JSON.parse(body) as T
     } catch (err) {
-      throw new HandlerError({ message: 'Input could be not be parsed as JSON', statusCode: STATUS.BAD_REQUEST })
+      throw this.defaultJSONParseFailResponse
     }
   }
 
@@ -93,10 +124,6 @@ export class APIGatewayHelper {
     return this.buildCustomResponse(STATUS.INTERNAL_SERVER_ERROR, body, headers)
   }
 
-  public getDefaultServerError () {
-    return this.defaultServerError
-  }
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private logWarning (err: any): void {
     if (!this.logger) {
@@ -119,14 +146,15 @@ export class APIGatewayHelper {
       return this.buildCustomResponse(err.statusCode, err.body, err.headers)
     }
     this.logError(errorMessage)
-    return this.serverError(this.getDefaultServerError())
+    const { statusCode, body, headers } = this.fallbackResponse
+    return this.buildCustomResponse(statusCode, body, headers)
   }
 
   public async wrapLogic (params: WrapLogicParameters): Promise<HandlerResponse> {
     const { logic, errorMessage } = params
     try {
       return await logic()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       return this.handleError(err, errorMessage)
     }
