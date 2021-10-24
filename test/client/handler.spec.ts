@@ -10,6 +10,10 @@ describe('APIGatewayHelper', () => {
     error: () => { }
   }
 
+  interface Data {
+    a: number
+  }
+
   describe('disableLogging', () => {
     it('should disable logging', () => {
       const instance = new APIGatewayHelper({ logger })
@@ -69,6 +73,44 @@ describe('APIGatewayHelper', () => {
         a: '42',
         b: 'answer'
       })
+    })
+  })
+
+  describe('parseJSON', () => {
+    const instance = new APIGatewayHelper({ logger })
+    it('should parse string to JSON', () => {
+      const input: Data = { a: 42 }
+
+      const output = instance.parseJSON<Data>(JSON.stringify(input))
+
+      expect(output).toEqual(input)
+    })
+
+    it('should throw if no input was supplied', () => {
+      expect(() => instance.parseJSON<Data>()).toThrow('No input supplied for JSON parsing')
+    })
+
+    it('should throw if the input could not be parsed', () => {
+      expect(() => instance.parseJSON<Data>('banana:{}')).toThrow('Input could be not be parsed as JSON')
+    })
+  })
+
+  describe('parseJSONAsPartial', () => {
+    const instance = new APIGatewayHelper({ logger })
+    it('should parse string to JSON', () => {
+      const input: Data = { a: 42 }
+
+      const output = instance.parseJSONAsPartial<Data>(JSON.stringify(input))
+
+      expect(output).toEqual(input)
+    })
+
+    it('should throw if no input was supplied', () => {
+      expect(() => instance.parseJSONAsPartial<Data>()).toThrow('No input supplied for JSON parsing')
+    })
+
+    it('should throw if the input could not be parsed', () => {
+      expect(() => instance.parseJSONAsPartial<Data>('banana:{}')).toThrow('Input could be not be parsed as JSON')
     })
   })
 })
