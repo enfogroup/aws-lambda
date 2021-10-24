@@ -45,11 +45,11 @@ export class APIGatewayHelper {
   private defaultHeaders: Headers
   private logger: Logger | undefined
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private defaultJSONParseFailResponse: HandlerError<any>
+  private defaultJSONParseFailError: HandlerError<any>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private defaultJSONParseNoBodyResponse: HandlerError<any>
+  private defaultJSONParseNoBodyError: HandlerError<any>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private fallbackResponse: HandlerError<any>
+  private fallbackError: HandlerError<any>
 
   /**
    * Creates a new APIGatewayHelper
@@ -62,17 +62,17 @@ export class APIGatewayHelper {
       ...params.defaultHeaders
     }
     this.logger = params.logger
-    this.defaultJSONParseFailResponse = new HandlerError({
+    this.defaultJSONParseFailError = new HandlerError({
       message: 'Input could not be parsed as JSON',
       statusCode: STATUS.BAD_REQUEST,
       body: 'Input could not be parsed as JSON'
     })
-    this.defaultJSONParseNoBodyResponse = new HandlerError({
+    this.defaultJSONParseNoBodyError = new HandlerError({
       message: 'No input supplied for JSON parsing',
       statusCode: STATUS.BAD_REQUEST,
       body: 'No input supplied for JSON parsing'
     })
-    this.fallbackResponse = new HandlerError({
+    this.fallbackError = new HandlerError({
       message: 'Something went wrong',
       statusCode: STATUS.INTERNAL_SERVER_ERROR,
       body: 'Something went wrong'
@@ -101,36 +101,36 @@ export class APIGatewayHelper {
    * @param err
    * A HandlerError
    */
-  public setFallbackResponse<T> (err: HandlerError<T>): void {
-    this.fallbackResponse = err
+  public setFallbackError<T> (err: HandlerError<T>): void {
+    this.fallbackError = err
   }
 
   /**
-   * Sets the HandlerError used to construct a response when JSON fails to parse
+   * Sets the HandlerError thrown JSON fails to parse
    * @param err
    * A HandlerError
    */
-  public setJSONParseFailResponse<T> (err: HandlerError<T>): void {
-    this.defaultJSONParseFailResponse = err
+  public setJSONParseFailError<T> (err: HandlerError<T>): void {
+    this.defaultJSONParseFailError = err
   }
 
   /**
-   * Sets the HandlerError used to construct a response when input to JSON parse is empty
+   * Sets the HandlerError when input to JSON parse is empty
    * @param err
    * A HandlerError
    */
-  public setJSONNoBodyResponse<T> (err: HandlerError<T>): void {
-    this.defaultJSONParseNoBodyResponse = err
+  public setJSONNoBodyError<T> (err: HandlerError<T>): void {
+    this.defaultJSONParseNoBodyError = err
   }
 
   private _parseJSON<T> (body?: string): T {
     if (!body) {
-      throw this.defaultJSONParseNoBodyResponse
+      throw this.defaultJSONParseNoBodyError
     }
     try {
       return JSON.parse(body) as T
     } catch (err) {
-      throw this.defaultJSONParseFailResponse
+      throw this.defaultJSONParseFailError
     }
   }
 
@@ -234,7 +234,7 @@ export class APIGatewayHelper {
       return this.buildCustomResponse(err.statusCode, err.body, err.headers)
     }
     this.logError(errorMessage)
-    const { statusCode, body, headers } = this.fallbackResponse
+    const { statusCode, body, headers } = this.fallbackError
     return this.buildCustomResponse(statusCode, body, headers)
   }
 

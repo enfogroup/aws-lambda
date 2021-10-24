@@ -284,7 +284,7 @@ describe('APIGatewayHelper', () => {
   describe('customization', () => {
     const instance = new APIGatewayHelper({})
     it('should allow setting of JSON parse response', async () => {
-      instance.setJSONParseFailResponse(new HandlerError({
+      instance.setJSONParseFailError(new HandlerError({
         statusCode: STATUS.IM_A_TEAPOT,
         body: 'Well this went bad'
       }))
@@ -304,7 +304,7 @@ describe('APIGatewayHelper', () => {
     })
 
     it('should allow setting of JSON no body response', async () => {
-      instance.setJSONNoBodyResponse(new HandlerError({
+      instance.setJSONNoBodyError(new HandlerError({
         statusCode: STATUS.NOT_FOUND,
         body: 'No body'
       }))
@@ -324,7 +324,7 @@ describe('APIGatewayHelper', () => {
     })
 
     it('should allow setting of fallback response', async () => {
-      instance.setFallbackResponse(new HandlerError({
+      instance.setFallbackError(new HandlerError({
         statusCode: STATUS.BAD_GATEWAY,
         body: 'Fallback'
       }))
