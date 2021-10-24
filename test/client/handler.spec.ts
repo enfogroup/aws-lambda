@@ -164,4 +164,40 @@ describe('APIGatewayHelper', () => {
       })
     })
   })
+
+  describe('ok', () => {
+    it('should return status 200', () => {
+      const instance = new APIGatewayHelper({ logger })
+
+      const output = instance.ok()
+
+      expect(output).toMatchObject({
+        statusCode: STATUS.OK
+      })
+    })
+  })
+
+  describe('clientError', () => {
+    it('should return status 400', () => {
+      const instance = new APIGatewayHelper({ logger })
+
+      const output = instance.clientError()
+
+      expect(output).toMatchObject({
+        statusCode: STATUS.BAD_REQUEST
+      })
+    })
+  })
+
+  describe('serverError', () => {
+    it('should return status 500', () => {
+      const instance = new APIGatewayHelper({ logger })
+
+      const output = instance.serverError()
+
+      expect(output).toMatchObject({
+        statusCode: STATUS.INTERNAL_SERVER_ERROR
+      })
+    })
+  })
 })
