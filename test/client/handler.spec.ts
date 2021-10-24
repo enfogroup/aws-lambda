@@ -6,6 +6,7 @@ import { Logger } from '@models/logger'
 import { STATUS } from '@models/http'
 import { HandlerError } from '@clients/error'
 import { checkAllMocksCalled } from '@test/tools'
+import { HandlerResponse } from 'index'
 
 describe('APIGatewayHelper', () => {
   const logger: Logger = {
@@ -280,6 +281,44 @@ describe('APIGatewayHelper', () => {
         statusCode: STATUS.INTERNAL_SERVER_ERROR
       })
       checkAllMocksCalled([warnMock, errorMock], 0)
+    })
+  })
+
+  describe('wrapLogic', () => {
+    it('should return the response from the logic function', async () => {
+      const instance = new APIGatewayHelper({ logger })
+      const logic = async (): Promise<HandlerResponse> => {
+        return Promise.resolve(instance.ok())
+      }
+
+      const output = await instance.wrapLogic({ logic, fallbackMessage: 'message' })
+
+      expect(output).toMatchObject({
+        statusCode: STATUS.OK
+      })
+    })
+
+    it('should return status code, body and headers throw in the logic function', async () => {
+      const instance = new APIGatewayHelper({ logger })
+      const logic = async (): Promise<HandlerResponse> => {
+        throw new HandlerError({
+          statusCode: STATUS.NOT_FOUND,
+          body: 'I could not find it',
+          headers: {
+            key: 'value'
+          }
+        })
+      }
+
+      const output = await instance.wrapLogic({ logic, fallbackMessage: 'message' })
+
+      expect(output).toMatchObject({
+        statusCode: STATUS.NOT_FOUND,
+        body: 'I could not find it',
+        headers: {
+          key: 'value'
+        }
+      })
     })
   })
 })
