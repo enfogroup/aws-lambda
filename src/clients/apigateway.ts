@@ -244,6 +244,7 @@ export class APIGatewayHelper {
    * See interface definition
    */
   public async wrapLogic (params: WrapLogicParameters): Promise<HandlerResponse> {
+    // istanbul ignore next
     const { logic, errorMessage = 'Something went wrong' } = params
     try {
       return await logic()
