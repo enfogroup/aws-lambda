@@ -81,7 +81,7 @@ export class APIGatewayHelper {
     return this._parseJSON<RecursivePartial<T>>(body)
   }
 
-  private buildCustomHandlerResponse<T> (statusCode: STATUS, body?: T, headers?: Headers): HandlerResponse {
+  public buildCustomHandlerResponse<T> (statusCode: STATUS, body?: T, headers?: Headers): HandlerResponse {
     return {
       statusCode,
       body: typeof body === 'string' ? body : JSON.stringify(body),

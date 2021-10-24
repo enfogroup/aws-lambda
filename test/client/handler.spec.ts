@@ -3,6 +3,7 @@ import { APIGatewayHelper } from '@clients/apigateway'
 
 // models
 import { Logger } from '@models/logger'
+import { STATUS } from '@models/http'
 
 describe('APIGatewayHelper', () => {
   const logger: Logger = {
@@ -111,6 +112,56 @@ describe('APIGatewayHelper', () => {
 
     it('should throw if the input could not be parsed', () => {
       expect(() => instance.parseJSONAsPartial<Data>('banana:{}')).toThrow('Input could be not be parsed as JSON')
+    })
+  })
+
+  describe('buildCustomHandlerResponse', () => {
+    const instance = new APIGatewayHelper({ logger })
+    it('should return a custom response', () => {
+      const input: Data = {
+        a: 4711
+      }
+
+      const output = instance.buildCustomHandlerResponse<Data>(STATUS.ACCEPTED, input)
+
+      expect(output).toMatchObject({
+        statusCode: STATUS.ACCEPTED,
+        body: JSON.stringify(input)
+      })
+    })
+
+    it('should handle string body', () => {
+      const output = instance.buildCustomHandlerResponse<string>(STATUS.OK, 'banana')
+
+      expect(output).toMatchObject({
+        statusCode: STATUS.OK,
+        body: 'banana'
+      })
+    })
+
+    it('should handle no body being provided', () => {
+      const output = instance.buildCustomHandlerResponse(STATUS.NO_CONTENT)
+
+      expect(output).toMatchObject({
+        statusCode: STATUS.NO_CONTENT,
+        body: undefined
+      })
+    })
+
+    it('should include custom headers', () => {
+      const input: Data = {
+        a: 4711
+      }
+
+      const output = instance.buildCustomHandlerResponse<Data>(STATUS.ACCEPTED, input, { key: 'value' })
+
+      expect(output).toMatchObject({
+        statusCode: STATUS.ACCEPTED,
+        body: JSON.stringify(input),
+        headers: {
+          key: 'value'
+        }
+      })
     })
   })
 })
