@@ -15,9 +15,9 @@ export interface APIGatewayHelperParams {
    */
   defaultHeaders?: Headers;
   /**
-   * Logger used to log warnings and errors
+   * Logger used to log warnings and errors. If no logger is supplied then nothing will be logged
    */
-  logger: Logger;
+  logger?: Logger;
 }
 
 export interface WrapLogicParameters {
@@ -28,8 +28,7 @@ export interface WrapLogicParameters {
 export class APIGatewayHelper {
   private accessControlAllowOrigin: string
   private defaultHeaders: Headers
-  private logger: Logger
-  private loggingEnabled: boolean = true
+  private logger: Logger | undefined
   private defaultServerError: string | object
 
   constructor (params: APIGatewayHelperParams) {
@@ -39,18 +38,6 @@ export class APIGatewayHelper {
     }
     this.logger = params.logger
     this.defaultServerError = 'Something went wrong'
-  }
-
-  public disableLogging (): void {
-    this.loggingEnabled = false
-  }
-
-  public enableLogging (): void {
-    this.loggingEnabled = true
-  }
-
-  public getLoggingStatus (): boolean {
-    return this.loggingEnabled
   }
 
   public getAccessControlAllowOriginHeader (): string {
@@ -110,16 +97,28 @@ export class APIGatewayHelper {
     return this.defaultServerError
   }
 
-  public handleError<T> (err: HandlerError<T> | Error, fallbackMessage: string): HandlerResponse {
-    if (this.getLoggingStatus()) {
-      this.logger.warn(err)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private logWarning (err: any): void {
+    if (!this.logger) {
+      return
     }
+    this.logger.warn(err)
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private logError (err: any): void {
+    if (!this.logger) {
+      return
+    }
+    this.logger.error(err)
+  }
+
+  public handleError<T> (err: HandlerError<T> | Error, fallbackMessage: string): HandlerResponse {
+    this.logWarning(err)
     if ('statusCode' in err) {
       return this.buildCustomResponse(err.statusCode, err.body, err.headers)
     }
-    if (this.getLoggingStatus()) {
-      this.logger.error(fallbackMessage)
-    }
+    this.logError(fallbackMessage)
     return this.serverError(this.getDefaultServerError())
   }
 
