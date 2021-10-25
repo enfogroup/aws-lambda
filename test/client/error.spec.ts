@@ -24,9 +24,13 @@ describe('HandlerError', () => {
       }
     })
 
-    expect(output.body).toEqual(input)
-    expect(output.statusCode).toEqual(HTTP_STATUS_CODE.NOT_FOUND)
     expect(output.message).toEqual('This is a test!')
-    expect(output.headers).toEqual({ key: 'value' })
+    expect(output.response).toMatchObject({
+      body: input,
+      statusCode: HTTP_STATUS_CODE.NOT_FOUND,
+      headers: {
+        key: 'value'
+      }
+    })
   })
 })
