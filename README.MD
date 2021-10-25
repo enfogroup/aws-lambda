@@ -54,10 +54,10 @@ const helper = new APIGatewayHelper({
 * setJSONParseFailError - used to set HandlerError thrown when input to parseJSON and parseJSONAsPartial is empty
 * parseJSON<T> - used to parse a string to T
 * parseJSONAsPartial<T> used to parse a string to RecursivePartial<T>. RecursivePartial is a type which makes every key in object optional. The main purpose of this function is to return a more realistic payload value which can then be used in validation using for example [joi](https://www.npmjs.com/package/joi)
-* buildCustomResponse - builds a custom response. Set http status code, body and headers
-* ok - returns a status 200 response. Set body and headers
-* clientError - returns a status 400 response. Set body and headers
-* serverError - returns a status 500 response. Set body and headers
+* buildCustomResponse - builds a custom response. Set http status code, body,  headers and isBase64Encoded
+* ok - returns a status 200 response. Set body, headers and isBase64Encoded
+* clientError - returns a status 400 response. Set body, headers and isBase64Encoded
+* serverError - returns a status 500 response. Set body, headers and isBase64Encoded
 * handleError - takes a HandlerError or Error and returns a response. In the case of a regular Error it will attempt to log it using the logger provided in the constructor. In the case of a HandlerError it will be used to build the response
 * wrapLogic - takes a business logic function, executes it while handling errors that might occur
 
