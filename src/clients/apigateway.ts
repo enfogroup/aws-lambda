@@ -1,7 +1,7 @@
 import { HandlerError } from './error'
 
 import { RecursivePartial } from '@models/common'
-import { HandlerResponse, Headers } from '@models/handler'
+import { HandlerResponse, Headers, ResponseWithoutStatusCode, ResponseWithStatusCode } from '@models/handler'
 import { HTTP_STATUS_CODE } from '@models/http'
 import { Logger } from '@models/logger'
 
@@ -161,14 +161,16 @@ export class APIGatewayHelper {
    * @param headers
    * Optional headers to pass in the response
    */
-  public buildCustomResponse<T> (statusCode: HTTP_STATUS_CODE, body?: T, headers?: Headers): HandlerResponse {
+  public buildCustomResponse<T> (params: ResponseWithStatusCode<T>): HandlerResponse {
+    const { statusCode, body, headers, isBase64Encoded = false } = params
     return {
       statusCode,
       body: typeof body === 'string' ? body : JSON.stringify(body),
       headers: {
         ...this.getDefaultHeaders(),
         ...headers
-      }
+      },
+      isBase64Encoded
     }
   }
 
@@ -179,8 +181,11 @@ export class APIGatewayHelper {
    * @param headers
    * Optional headers to pass in the response
    */
-  public ok<T> (body?: T, headers?: Headers) {
-    return this.buildCustomResponse(HTTP_STATUS_CODE.OK, body, headers)
+  public ok<T> (params: ResponseWithoutStatusCode<T>) {
+    return this.buildCustomResponse({
+      ...params,
+      statusCode: HTTP_STATUS_CODE.OK
+    })
   }
 
   /**
@@ -190,8 +195,11 @@ export class APIGatewayHelper {
    * @param headers
    * Optional headers to pass in the response
    */
-  public clientError<T> (body?: T, headers?: Headers) {
-    return this.buildCustomResponse(HTTP_STATUS_CODE.BAD_REQUEST, body, headers)
+  public clientError<T> (params: ResponseWithoutStatusCode<T>) {
+    return this.buildCustomResponse({
+      ...params,
+      statusCode: HTTP_STATUS_CODE.BAD_REQUEST
+    })
   }
 
   /**
@@ -201,8 +209,11 @@ export class APIGatewayHelper {
    * @param headers
    * Optional headers to pass in the response
    */
-  public serverError<T> (body?: T, headers?: Headers) {
-    return this.buildCustomResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR, body, headers)
+  public serverError<T> (params: ResponseWithoutStatusCode<T>) {
+    return this.buildCustomResponse({
+      ...params,
+      statusCode: HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR
+    })
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -231,11 +242,10 @@ export class APIGatewayHelper {
   public handleError<T> (err: HandlerError<T> | Error, errorMessage: string): HandlerResponse {
     this.logWarning(err)
     if ('statusCode' in err) {
-      return this.buildCustomResponse(err.statusCode, err.body, err.headers)
+      return this.buildCustomResponse(err)
     }
     this.logError(errorMessage)
-    const { statusCode, body, headers } = this.fallbackError
-    return this.buildCustomResponse(statusCode, body, headers)
+    return this.buildCustomResponse(this.fallbackError.response)
   }
 
   /**

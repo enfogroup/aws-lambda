@@ -10,7 +10,7 @@ interface BaseResponse {
   /**
    * Headers
    */
-  headers: Headers;
+  headers?: Headers;
   /**
    * If set to true the response will be treated as binary
    */
@@ -25,6 +25,10 @@ export interface HandlerResponse extends BaseResponse {
    * Optional body, stringified
    */
   body?: string;
+  /**
+   * Headers
+   */
+  headers: Headers;
 }
 
 /**
