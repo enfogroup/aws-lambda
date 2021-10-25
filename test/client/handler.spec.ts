@@ -98,20 +98,21 @@ describe('APIGatewayHelper', () => {
   describe('buildCustomResponse', () => {
     const instance = new APIGatewayHelper({})
     it('should return a custom response', () => {
-      const input: Data = {
+      const body: Data = {
         a: 4711
       }
 
-      const output = instance.buildCustomResponse<Data>(HTTP_STATUS_CODE.ACCEPTED, input)
+      const output = instance.buildCustomResponse<Data>({ statusCode: HTTP_STATUS_CODE.ACCEPTED, body })
 
       expect(output).toMatchObject({
         statusCode: HTTP_STATUS_CODE.ACCEPTED,
-        body: JSON.stringify(input)
+        body: JSON.stringify(body),
+        isBase64Encoded: false
       })
     })
 
     it('should handle string body', () => {
-      const output = instance.buildCustomResponse<string>(HTTP_STATUS_CODE.OK, 'banana')
+      const output = instance.buildCustomResponse<string>({ statusCode: HTTP_STATUS_CODE.OK, body: 'banana' })
 
       expect(output).toMatchObject({
         statusCode: HTTP_STATUS_CODE.OK,
@@ -120,7 +121,7 @@ describe('APIGatewayHelper', () => {
     })
 
     it('should handle no body being provided', () => {
-      const output = instance.buildCustomResponse(HTTP_STATUS_CODE.NO_CONTENT)
+      const output = instance.buildCustomResponse({ statusCode: HTTP_STATUS_CODE.NO_CONTENT })
 
       expect(output).toMatchObject({
         statusCode: HTTP_STATUS_CODE.NO_CONTENT,
@@ -129,18 +130,27 @@ describe('APIGatewayHelper', () => {
     })
 
     it('should include custom headers', () => {
-      const input: Data = {
+      const body: Data = {
         a: 4711
       }
 
-      const output = instance.buildCustomResponse<Data>(HTTP_STATUS_CODE.ACCEPTED, input, { key: 'value' })
+      const output = instance.buildCustomResponse<Data>({ statusCode: HTTP_STATUS_CODE.ACCEPTED, body, headers: { key: 'value' } })
 
       expect(output).toMatchObject({
         statusCode: HTTP_STATUS_CODE.ACCEPTED,
-        body: JSON.stringify(input),
+        body: JSON.stringify(body),
         headers: {
           key: 'value'
         }
+      })
+    })
+
+    it('should set isBase64Encoded', () => {
+      const output = instance.buildCustomResponse<Data>({ statusCode: HTTP_STATUS_CODE.ACCEPTED, isBase64Encoded: true })
+
+      expect(output).toMatchObject({
+        statusCode: HTTP_STATUS_CODE.ACCEPTED,
+        isBase64Encoded: true
       })
     })
   })

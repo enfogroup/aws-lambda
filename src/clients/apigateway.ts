@@ -181,7 +181,7 @@ export class APIGatewayHelper {
    * @param headers
    * Optional headers to pass in the response
    */
-  public ok<T> (params: ResponseWithoutStatusCode<T>) {
+  public ok<T> (params: ResponseWithoutStatusCode<T> = {}) {
     return this.buildCustomResponse({
       ...params,
       statusCode: HTTP_STATUS_CODE.OK
@@ -195,7 +195,7 @@ export class APIGatewayHelper {
    * @param headers
    * Optional headers to pass in the response
    */
-  public clientError<T> (params: ResponseWithoutStatusCode<T>) {
+  public clientError<T> (params: ResponseWithoutStatusCode<T> = {}) {
     return this.buildCustomResponse({
       ...params,
       statusCode: HTTP_STATUS_CODE.BAD_REQUEST
@@ -209,7 +209,7 @@ export class APIGatewayHelper {
    * @param headers
    * Optional headers to pass in the response
    */
-  public serverError<T> (params: ResponseWithoutStatusCode<T>) {
+  public serverError<T> (params: ResponseWithoutStatusCode<T> = {}) {
     return this.buildCustomResponse({
       ...params,
       statusCode: HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR
@@ -241,8 +241,8 @@ export class APIGatewayHelper {
    */
   public handleError<T> (err: HandlerError<T> | Error, errorMessage: string): HandlerResponse {
     this.logWarning(err)
-    if ('statusCode' in err) {
-      return this.buildCustomResponse(err)
+    if ('response' in err) {
+      return this.buildCustomResponse(err.response)
     }
     this.logError(errorMessage)
     return this.buildCustomResponse(this.fallbackError.response)
