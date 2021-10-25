@@ -10,7 +10,7 @@ npm install @enfo/aws-lambda --save
 
 ## Purpose of package
 
-This package aims to simplify the response flow in an AWS Lambda invoked by API Gateway. It exposes functionality that allows for default responses, easy throwing from anywhere within your business logic and handling of those thrown errors.
+This package aims to simplify the response flow in an AWS Lambda invoked by API Gateway. It exposes functionality that allows for default responses, easy throwing from anywhere within your business logic and handling of those thrown errors. The philosophy behind the package is to separate AWS logic from the business as described as point #1 in [Best practices for working with AWS Lambda functions](https://docs.aws.amazon.com/lambda/latest/dg/best-practices.html). 
 
 ## HandlerError
 
@@ -63,7 +63,7 @@ const helper = new APIGatewayHelper({
 
 ## Examples
 
-Simple use
+### Simple use
 
 ```typescript
 import { APIGatewayHelper, HandlerError, HTTP_STATUS_CODE } from '@enfo/aws-lambda'
@@ -81,7 +81,7 @@ const handlerOne = async (event: AWSLambda.APIGatewayProxyEvent) => { // interfa
   return helper.wrapLogic({
     errorMessage: 'Something went wrong in lambda X',
     logic: async () => {
-      return ok<string>('Everything went fine!')
+      return helper.ok<string>({ body: 'Everything went fine!' })
     }
   })
 }
@@ -91,7 +91,7 @@ const handlerTwo = async (event: AWSLambda.APIGatewayProxyEvent) => {
     errorMessage: 'Something went wrong in lambda Y',
     logic: async () => {
       const body = helper.parseJSON<{a: string}>(event.body) // will throw if something is wrong with the body, which will be handled by the wrapper
-      return helper.buildCustomResponse(HTTP_STATUS_CODE.ACCEPTED)
+      return helper.buildCustomResponse({ statusCode: HTTP_STATUS_CODE.ACCEPTED, body })
     }
   })
 }
@@ -107,20 +107,19 @@ const handlerThree = async (event: AWSLambda.APIGatewayProxyEvent) => {
     }
   })
 }
+
 ```
 
-Customizing error responses. Let us start by creating an APIGatewayHelper
+### Customizing error responses
 
 ```typescript
 import { APIGatewayHelper, HandlerError, HTTP_STATUS_CODE } from '@enfo/aws-lambda'
-import logger from '@enfo/logger'
 
 const helper = new APIGatewayHelper({
   accessControlAllowOrigin: 'myOrigin', // optional accessControlAllowOrigin header, defaults to '*'
   defaultHeaders: { // optional headers to include in ALL responses
     key: 'value'
-  },
-  logger: logger // optional logger used to log when errors occur
+  }
 })
 ```
 
@@ -139,7 +138,7 @@ const handlerOne = async (event: AWSLambda.APIGatewayProxyEvent) => {
     errorMessage: 'Something went wrong in lambda X',
     logic: async () => {
       helper.parseJSON('broken[}')
-      return helper.ok<string>('Everything went fine!')
+      return helper.ok<string>({ body: 'Everything went fine!' })
     }
   })
 }
@@ -175,5 +174,82 @@ const handlerThree = async (event: AWSLambda.APIGatewayProxyEvent) => {
   }catch(err){
     return helper.handleError(err, 'Something went wrong in lambda X')
   }
+}
+```
+
+### Full example with file structure
+
+Let us have a look at an example with two lambdas which are a part of a pets' API. This example describes an interface for all error returned by the API in the form of APIError. This is then used to modify the instance with the proper answers. Then it is finally consumed within two lambdas using wrapLogic. The logic itself inside "get" and "put" could throw a HandlerError to return a response.
+
+```typescript
+// errors.ts
+
+export interface APIError {
+  source: string;
+  details: string;
+}
+```
+
+```typescript
+// init.ts
+import { HandlerError, APIGatewayHelper, HTTP_STATUS_CODE } from '@enfo/aws-lambda'
+import { APIError } from './errors'
+
+const gatewayHelper = new APIGatewayHelper({})
+gatewayHelper.setJSONParseFailError(new HandlerError<APIError>({
+  statusCode: HTTP_STATUS_CODE.BAD_REQUEST,
+  body: {
+    source: 'Pets application',
+    details: 'Bad JSON in body'
+  }
+}))
+gatewayHelper.setJSONNoBodyError(new HandlerError<APIError>({
+  statusCode: HTTP_STATUS_CODE.BAD_REQUEST,
+  body: {
+    source: 'Pets application',
+    details: 'No body in request'
+  }
+}))
+gatewayHelper.setFallbackError(new HandlerError<APIError>({
+  statusCode: HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR,
+  body: {
+    source: 'Pets application',
+    details: 'Something went wrong processing your request. Sorry for the inconvenience'
+  }
+}))
+```
+
+```typescript
+// handler.ts
+import { HandlerResponse } from '@enfo/aws-lambda'
+
+import { gatewayHelper } from './init'
+import { APIError } from './errors.ts'
+
+import { get, put } from './pets' // file containing actual database interaction
+
+export const getPet = async (event: AWSLambda.APIGatewayProxyEvent): Promise<HandlerResponse> => {
+  return gatewayHelper.wrapLogic({
+    logic: () => {
+      return gatewayHelper.ok({
+        statusCode: HTTP_STATUS_CODE.OK,
+        pet: await get(event.id)
+      })
+    },
+    errorMessage: 'Something went wrong getting a pet'
+  })
+}
+
+export const putPet = async (event: AWSLambda.APIGatewayProxyEvent): Promise<HandlerResponse> => {
+  return gatewayHelper.wrapLogic({
+    logic: () => {
+      const body = gatewayHelper.parseJSONAsPartial(event.body)
+      return gatewayHelper.ok({
+        statusCode: HTTP_STATUS_CODE.OK,
+        pet: await put(body)
+      })
+    },
+    errorMessage: 'Something went wrong creating a pet'
+  })
 }
 ```
