@@ -154,12 +154,8 @@ export class APIGatewayHelper {
 
   /**
    * Builds a custom HandlerResponse
-   * @param statusCode
-   * HTTP_STATUS_CODE value
-   * @param body
-   * Optional body to include. Can be of object or string type
-   * @param headers
-   * Optional headers to pass in the response
+   * @param params
+   * See interface definition
    */
   public buildCustomResponse<T> (params: ResponseWithStatusCode<T>): HandlerResponse {
     const { statusCode, body, headers, isBase64Encoded = false } = params
@@ -176,10 +172,8 @@ export class APIGatewayHelper {
 
   /**
    * Builds an HTTP 200 response
-   * @param body
-   * Optional body to include. Can be of object or string type
-   * @param headers
-   * Optional headers to pass in the response
+   * @param params
+   * See interface definition
    */
   public ok<T> (params: ResponseWithoutStatusCode<T> = {}) {
     return this.buildCustomResponse({
@@ -190,10 +184,8 @@ export class APIGatewayHelper {
 
   /**
    * Builds an HTTP 400 response
-   * @param body
-   * Optional body to include. Can be of object or string type
-   * @param headers
-   * Optional headers to pass in the response
+   * @param params
+   * See interface definition
    */
   public clientError<T> (params: ResponseWithoutStatusCode<T> = {}) {
     return this.buildCustomResponse({
@@ -204,10 +196,8 @@ export class APIGatewayHelper {
 
   /**
    * Builds an HTTP 500 response
-   * @param body
-   * Optional body to include. Can be of object or string type
-   * @param headers
-   * Optional headers to pass in the response
+   * @param params
+   * See interface definition
    */
   public serverError<T> (params: ResponseWithoutStatusCode<T> = {}) {
     return this.buildCustomResponse({
