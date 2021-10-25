@@ -4,7 +4,7 @@ import { APIGatewayHelper } from '@clients/apigateway'
 // models
 import { Logger } from '@models/logger'
 import { HTTP_STATUS_CODE } from '@models/http'
-import { HandlerError } from '@clients/error'
+import { APIGatewayHandlerError } from '@clients/error'
 import { HandlerResponse } from '@models/handler'
 
 // tools
@@ -193,8 +193,8 @@ describe('APIGatewayHelper', () => {
 
   describe('handleError', () => {
     const instance = new APIGatewayHelper({})
-    it('should return a response with data from the HandlerError', () => {
-      const err = new HandlerError({ statusCode: HTTP_STATUS_CODE.IM_A_TEAPOT, body: 'banana', headers: { a: 'b' } })
+    it('should return a response with data from the APIGatewayHandlerError', () => {
+      const err = new APIGatewayHandlerError({ statusCode: HTTP_STATUS_CODE.IM_A_TEAPOT, body: 'banana', headers: { a: 'b' } })
 
       const output = instance.handleError(err, 'Log me')
 
@@ -216,7 +216,7 @@ describe('APIGatewayHelper', () => {
       })
     })
 
-    it('should log warning when processing a HandlerError', () => {
+    it('should log warning when processing a APIGatewayHandlerError', () => {
       const warnMock = jest.fn()
       const errorMock = jest.fn()
       const logger: Logger = {
@@ -224,7 +224,7 @@ describe('APIGatewayHelper', () => {
         error: errorMock
       }
       const instance = new APIGatewayHelper({ logger })
-      const err = new HandlerError({ statusCode: HTTP_STATUS_CODE.IM_A_TEAPOT })
+      const err = new APIGatewayHandlerError({ statusCode: HTTP_STATUS_CODE.IM_A_TEAPOT })
 
       const output = instance.handleError(err, 'Log me')
 
@@ -270,7 +270,7 @@ describe('APIGatewayHelper', () => {
     it('should return status code, body and headers throw in the logic function', async () => {
       const instance = new APIGatewayHelper({})
       const logic = async (): Promise<HandlerResponse> => {
-        throw new HandlerError({
+        throw new APIGatewayHandlerError({
           statusCode: HTTP_STATUS_CODE.NOT_FOUND,
           body: 'I could not find it',
           headers: {
@@ -294,7 +294,7 @@ describe('APIGatewayHelper', () => {
   describe('customization', () => {
     const instance = new APIGatewayHelper({})
     it('should allow setting of JSON parse response', async () => {
-      instance.setJSONParseFailError(new HandlerError({
+      instance.setJSONParseFailError(new APIGatewayHandlerError({
         statusCode: HTTP_STATUS_CODE.IM_A_TEAPOT,
         body: 'Well this went bad'
       }))
@@ -314,7 +314,7 @@ describe('APIGatewayHelper', () => {
     })
 
     it('should allow setting of JSON no body response', async () => {
-      instance.setJSONNoBodyError(new HandlerError({
+      instance.setJSONNoBodyError(new APIGatewayHandlerError({
         statusCode: HTTP_STATUS_CODE.NOT_FOUND,
         body: 'No body'
       }))
@@ -334,7 +334,7 @@ describe('APIGatewayHelper', () => {
     })
 
     it('should allow setting of fallback response', async () => {
-      instance.setFallbackError(new HandlerError({
+      instance.setFallbackError(new APIGatewayHandlerError({
         statusCode: HTTP_STATUS_CODE.BAD_GATEWAY,
         body: 'Fallback'
       }))

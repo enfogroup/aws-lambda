@@ -1,9 +1,9 @@
 import { ResponseWithStatusCode } from '@models/handler'
 
 /**
- * Params used to instantiate a HandlerError
+ * Params used to instantiate a APIGatewayHandlerError
  */
-export interface HandlerErrorParams<T> extends ResponseWithStatusCode<T> {
+export interface APIGatewayHandlerErrorParams<T> extends ResponseWithStatusCode<T> {
   /**
    * Optional message to include. Only included for unit testing purposes
    */
@@ -14,14 +14,14 @@ export interface HandlerErrorParams<T> extends ResponseWithStatusCode<T> {
  * Custom Error to be throw from within any part of the lambda flow.
  * The error should be caught and handled using APIGatewayHelper.handleError
  */
-export class HandlerError<T> extends Error {
+export class APIGatewayHandlerError<T> extends Error {
   public readonly response: ResponseWithStatusCode<T>
   /**
-   * Creates a new HandlerError
+   * Creates a new APIGatewayHandlerError
    * @param params
    * See interface definition
    */
-  constructor (params: HandlerErrorParams<T>) {
+  constructor (params: APIGatewayHandlerErrorParams<T>) {
     const { message, ...rest } = params
     super(message)
     this.response = rest

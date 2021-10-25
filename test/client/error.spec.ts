@@ -1,10 +1,10 @@
 // to be tested
-import { HandlerError } from '@clients/error'
+import { APIGatewayHandlerError } from '@clients/error'
 
 // models
 import { HTTP_STATUS_CODE } from '@models/http'
 
-describe('HandlerError', () => {
+describe('APIGatewayHandlerError', () => {
   it('should set all parameters if passed', () => {
     interface Data {
       a: number;
@@ -15,7 +15,7 @@ describe('HandlerError', () => {
       b: 'answer'
     }
 
-    const output = new HandlerError<Data>({
+    const output = new APIGatewayHandlerError<Data>({
       body: input,
       statusCode: HTTP_STATUS_CODE.NOT_FOUND,
       message: 'This is a test!',
