@@ -1,4 +1,4 @@
-import { STATUS } from '@models/http'
+import { HTTP_STATUS_CODE } from '@models/http'
 
 export type Headers = Record<string, string>;
 
@@ -9,7 +9,7 @@ export interface HandlerResponse {
   /**
    * HTTP status code
    */
-  statusCode: STATUS;
+  statusCode: HTTP_STATUS_CODE;
   /**
    * Headers
    */

@@ -1,5 +1,5 @@
 import { Headers } from '@models/handler'
-import { STATUS } from '@models/http'
+import { HTTP_STATUS_CODE } from '@models/http'
 
 /**
  * Params used to instantiate a HandlerError
@@ -12,7 +12,7 @@ export interface HandlerErrorParams<T> {
   /**
    * Status code to return to the caller
    */
-  statusCode: STATUS;
+  statusCode: HTTP_STATUS_CODE;
   /**
    * Optional body of any type
    */
@@ -28,7 +28,7 @@ export interface HandlerErrorParams<T> {
  * The error should be caught and handled using APIGatewayHelper.handleError
  */
 export class HandlerError<T> extends Error {
-  public readonly statusCode: STATUS;
+  public readonly statusCode: HTTP_STATUS_CODE;
   public readonly body?: T;
   public readonly headers?: Headers;
   /**

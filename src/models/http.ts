@@ -1,7 +1,7 @@
 /**
  * Available HTTP statuses
  */
-export enum STATUS {
+export enum HTTP_STATUS_CODE {
   CONTINUE = 100,
   SWITCHING_PROTOCOLS = 101,
   PROCESSING = 102,

@@ -17,10 +17,10 @@ This package aims to simplify the response flow in an AWS Lambda invoked by API 
 HandlerError is an extension of Error. It should be thrown whenever you want a response in your code which is not a part of the happy path. If you for example fail to find a resource you can simply throw a new HandlerError with status code 404. Or if the invoker does not have access to a resource you can return a 403 with a specific message.
 
 ```typescript
-import { HandlerError, STATUS } from '@enfo/aws-lambda'
+import { HandlerError, HTTP_STATUS_CODE } from '@enfo/aws-lambda'
 
 new HandlerError<string>({
-  statusCode: STATUS.NOT_FOUND, // HTTP status code to return to invoker
+  statusCode: HTTP_STATUS_CODE.NOT_FOUND, // HTTP status code to return to invoker
   body: 'Unable to find resource', // Optional body to include in response
   headers: { // Optional headers to include in response
     'my-header': 'cool-value'
@@ -66,7 +66,7 @@ const helper = new APIGatewayHelper({
 Simple use
 
 ```typescript
-import { APIGatewayHelper, HandlerError, STATUS } from '@enfo/aws-lambda'
+import { APIGatewayHelper, HandlerError, HTTP_STATUS_CODE } from '@enfo/aws-lambda'
 import logger from '@enfo/logger'
 
 const helper = new APIGatewayHelper({
@@ -91,7 +91,7 @@ const handlerTwo = async (event: AWSLambda.APIGatewayProxyEvent) => {
     errorMessage: 'Something went wrong in lambda Y',
     logic: async () => {
       const body = helper.parseJSON<{a: string}>(event.body) // will throw if something is wrong with the body, which will be handled by the wrapper
-      return helper.buildCustomResponse(STATUS.ACCEPTED)
+      return helper.buildCustomResponse(HTTP_STATUS_CODE.ACCEPTED)
     }
   })
 }
@@ -101,7 +101,7 @@ const handlerThree = async (event: AWSLambda.APIGatewayProxyEvent) => {
     errorMessage: 'Something went wrong in lambda Z',
     logic: async () => {
       throw new HandlerError<string>({
-        statusCode: STATUS.NOT_FOUND,
+        statusCode: HTTP_STATUS_CODE.NOT_FOUND,
         body: 'Unable to find resource'
       })
     }
@@ -112,7 +112,7 @@ const handlerThree = async (event: AWSLambda.APIGatewayProxyEvent) => {
 Customizing error responses. Let us start by creating an APIGatewayHelper
 
 ```typescript
-import { APIGatewayHelper, HandlerError, STATUS } from '@enfo/aws-lambda'
+import { APIGatewayHelper, HandlerError, HTTP_STATUS_CODE } from '@enfo/aws-lambda'
 import logger from '@enfo/logger'
 
 const helper = new APIGatewayHelper({
@@ -128,7 +128,7 @@ Let us modify the JSONParseFailError and then use it. The response to the invoke
 
 ```typescript
 helper.setJSONParseFailError(new HandlerError({
-  statusCode: STATUS.BAD_REQUEST,
+  statusCode: HTTP_STATUS_CODE.BAD_REQUEST,
   body: {
     message: 'Body in payload was not proper JSON'
   }
@@ -149,7 +149,7 @@ Now, let us have a look at modifying the fallback response. This response gets u
 
 ```typescript
 helper.setFallbackError(new HandlerError({
-  statusCode: STATUS.INTERNAL_SERVER_ERROR,
+  statusCode: HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR,
   body: {
     message: 'Something went catastrophically wrong processing your request, I am sorry'
   }

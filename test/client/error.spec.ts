@@ -2,7 +2,7 @@
 import { HandlerError } from '@clients/error'
 
 // models
-import { STATUS } from '@models/http'
+import { HTTP_STATUS_CODE } from '@models/http'
 
 describe('HandlerError', () => {
   it('should set all parameters if passed', () => {
@@ -17,7 +17,7 @@ describe('HandlerError', () => {
 
     const output = new HandlerError<Data>({
       body: input,
-      statusCode: STATUS.NOT_FOUND,
+      statusCode: HTTP_STATUS_CODE.NOT_FOUND,
       message: 'This is a test!',
       headers: {
         key: 'value'
@@ -25,7 +25,7 @@ describe('HandlerError', () => {
     })
 
     expect(output.body).toEqual(input)
-    expect(output.statusCode).toEqual(STATUS.NOT_FOUND)
+    expect(output.statusCode).toEqual(HTTP_STATUS_CODE.NOT_FOUND)
     expect(output.message).toEqual('This is a test!')
     expect(output.headers).toEqual({ key: 'value' })
   })

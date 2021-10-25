@@ -2,7 +2,7 @@ import { HandlerError } from './error'
 
 import { RecursivePartial } from '@models/common'
 import { HandlerResponse, Headers } from '@models/handler'
-import { STATUS } from '@models/http'
+import { HTTP_STATUS_CODE } from '@models/http'
 import { Logger } from '@models/logger'
 
 /**
@@ -64,17 +64,17 @@ export class APIGatewayHelper {
     this.logger = params.logger
     this.defaultJSONParseFailError = new HandlerError({
       message: 'Input could not be parsed as JSON',
-      statusCode: STATUS.BAD_REQUEST,
+      statusCode: HTTP_STATUS_CODE.BAD_REQUEST,
       body: 'Input could not be parsed as JSON'
     })
     this.defaultJSONParseNoBodyError = new HandlerError({
       message: 'No input supplied for JSON parsing',
-      statusCode: STATUS.BAD_REQUEST,
+      statusCode: HTTP_STATUS_CODE.BAD_REQUEST,
       body: 'No input supplied for JSON parsing'
     })
     this.fallbackError = new HandlerError({
       message: 'Something went wrong',
-      statusCode: STATUS.INTERNAL_SERVER_ERROR,
+      statusCode: HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR,
       body: 'Something went wrong'
     })
   }
@@ -155,13 +155,13 @@ export class APIGatewayHelper {
   /**
    * Builds a custom HandlerResponse
    * @param statusCode
-   * STATUS value
+   * HTTP_STATUS_CODE value
    * @param body
    * Optional body to include. Can be of object or string type
    * @param headers
    * Optional headers to pass in the response
    */
-  public buildCustomResponse<T> (statusCode: STATUS, body?: T, headers?: Headers): HandlerResponse {
+  public buildCustomResponse<T> (statusCode: HTTP_STATUS_CODE, body?: T, headers?: Headers): HandlerResponse {
     return {
       statusCode,
       body: typeof body === 'string' ? body : JSON.stringify(body),
@@ -180,7 +180,7 @@ export class APIGatewayHelper {
    * Optional headers to pass in the response
    */
   public ok<T> (body?: T, headers?: Headers) {
-    return this.buildCustomResponse(STATUS.OK, body, headers)
+    return this.buildCustomResponse(HTTP_STATUS_CODE.OK, body, headers)
   }
 
   /**
@@ -191,7 +191,7 @@ export class APIGatewayHelper {
    * Optional headers to pass in the response
    */
   public clientError<T> (body?: T, headers?: Headers) {
-    return this.buildCustomResponse(STATUS.BAD_REQUEST, body, headers)
+    return this.buildCustomResponse(HTTP_STATUS_CODE.BAD_REQUEST, body, headers)
   }
 
   /**
@@ -202,7 +202,7 @@ export class APIGatewayHelper {
    * Optional headers to pass in the response
    */
   public serverError<T> (body?: T, headers?: Headers) {
-    return this.buildCustomResponse(STATUS.INTERNAL_SERVER_ERROR, body, headers)
+    return this.buildCustomResponse(HTTP_STATUS_CODE.INTERNAL_SERVER_ERROR, body, headers)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
