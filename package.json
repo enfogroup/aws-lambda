@@ -17,7 +17,11 @@
     "type": "git",
     "url": "https://github.com/enfogroup/aws-lambda.git"
   },
-  "keywords": [],
+  "keywords": [
+    "aws",
+    "lambda",
+    "handler"
+  ],
   "author": "Urban Pettersson",
   "license": "MIT",
   "homepage": "https://github.com/enfogroup/aws-lambda#readme",
