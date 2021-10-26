@@ -183,7 +183,6 @@ Let us have a look at an example with two lambdas which are a part of a pets' AP
 
 ```typescript
 // errors.ts
-
 export interface APIError {
   source: string;
   details: string;
