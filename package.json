@@ -1,7 +1,7 @@
 {
   "name": "@enfo/aws-lambda",
   "version": "0.0.1",
-  "description": "A fleshed out typescript NPM package template",
+  "description": "Simplifies response flow when working with AWS Lambda and API Gateway",
   "main": "index.js",
   "scripts": {
     "postinstall": "npx husky install",
