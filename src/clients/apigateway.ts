@@ -123,7 +123,7 @@ export class APIGatewayHelper {
     this.defaultJSONParseNoBodyError = err
   }
 
-  private _parseJSON<T> (body?: string): T {
+  private _parseJSON<T> (body?: string | null): T {
     if (!body) {
       throw this.defaultJSONParseNoBodyError
     }
@@ -139,7 +139,7 @@ export class APIGatewayHelper {
    * @param body
    * Body as string or undefined
    */
-  public parseJSON<T> (body?: string): T {
+  public parseJSON<T> (body?: string | null): T {
     return this._parseJSON<T>(body)
   }
 
