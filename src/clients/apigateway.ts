@@ -148,7 +148,7 @@ export class APIGatewayHelper {
    * @param body
    * Body as string or undefined
    */
-  public parseJSONAsPartial<T> (body?: string): RecursivePartial<T> {
+  public parseJSONAsPartial<T> (body?: string | null): RecursivePartial<T> {
     return this._parseJSON<RecursivePartial<T>>(body)
   }
 
