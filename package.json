@@ -1,6 +1,6 @@
 {
   "name": "@enfo/aws-lambda",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Simplifies response flow when working with AWS Lambda and API Gateway",
   "main": "index.js",
   "scripts": {
