@@ -138,6 +138,10 @@ export class APIGatewayHelper {
    * Parses a string as JSON casting it to T
    * @param body
    * Body as string or undefined
+   * @throws
+   * If body is falsy. The APIGatewayHandlerError thrown can be set using setJSONNoBodyError
+   * @throws
+   * If body cannot be parsed as JSON. The APIGatewayHandlerError thrown can be set using setJSONParseFailError
    */
   public parseJSON<T> (body?: string | null): T {
     return this._parseJSON<T>(body)
@@ -147,6 +151,10 @@ export class APIGatewayHelper {
    * Parses a string as JSON casting it to RecursivePartial<T>. RecursivePartial will set every key of T to optional
    * @param body
    * Body as string or undefined
+   * @throws
+   * If body is falsy. The APIGatewayHandlerError thrown can be set using setJSONNoBodyError
+   * @throws
+   * If body cannot be parsed as JSON. The APIGatewayHandlerError thrown can be set using setJSONParseFailError
    */
   public parseJSONAsPartial<T> (body?: string | null): RecursivePartial<T> {
     return this._parseJSON<RecursivePartial<T>>(body)
