@@ -231,8 +231,7 @@ export const getPet = async (event: AWSLambda.APIGatewayProxyEvent): Promise<Han
   return gatewayHelper.wrapLogic({
     logic: () => {
       return gatewayHelper.ok({
-        statusCode: HTTP_STATUS_CODE.OK,
-        pet: await get(event.id)
+        body: await get(event.id)
       })
     },
     errorMessage: 'Something went wrong getting a pet'
@@ -244,8 +243,7 @@ export const putPet = async (event: AWSLambda.APIGatewayProxyEvent): Promise<Han
     logic: () => {
       const body = gatewayHelper.parseJSONAsPartial(event.body)
       return gatewayHelper.ok({
-        statusCode: HTTP_STATUS_CODE.OK,
-        pet: await put(body)
+        body: await put(body)
       })
     },
     errorMessage: 'Something went wrong creating a pet'
