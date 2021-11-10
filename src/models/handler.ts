@@ -22,9 +22,9 @@ interface BaseResponse {
  */
 export interface HandlerResponse extends BaseResponse {
   /**
-   * Optional body, stringified
+   * Body stringified
    */
-  body?: string;
+  body: string;
   /**
    * Headers
    */

@@ -159,9 +159,12 @@ export class APIGatewayHelper {
    */
   public buildCustomResponse<T> (params: ResponseWithStatusCode<T>): HandlerResponse {
     const { statusCode, body, headers, isBase64Encoded = false } = params
+    const responseBody = body
+      ? (typeof body === 'string' ? body : JSON.stringify(body))
+      : ''
     return {
       statusCode,
-      body: typeof body === 'string' ? body : JSON.stringify(body),
+      body: responseBody,
       headers: {
         ...this.getDefaultHeaders(),
         ...headers

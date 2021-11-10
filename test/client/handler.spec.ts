@@ -125,7 +125,7 @@ describe('APIGatewayHelper', () => {
 
       expect(output).toMatchObject({
         statusCode: HTTP_STATUS_CODE.NO_CONTENT,
-        body: undefined
+        body: ''
       })
     })
 
