@@ -179,7 +179,7 @@ const handlerThree = async (event: AWSLambda.APIGatewayProxyEvent) => {
 
 ### Full example with file structure
 
-Let us have a look at an example with two lambdas which are a part of a pets' API. This example describes an interface for all error returned by the API in the form of APIError. This is then used to modify the instance with the proper answers. Then it is finally consumed within two lambdas using wrapLogic. The logic itself inside "get" and "put" could throw a APIGatewayHandlerError to return a response.
+Let us have a look at an example with two lambdas which are a part of a pets API. This example describes an interface for all error returned by the API in the form of APIError. This is then used to modify the instance with the proper answers. Then it is finally consumed within two lambdas using wrapLogic. The logic itself inside "get" and "put" could throw a APIGatewayHandlerError to return a response.
 
 ```typescript
 // errors.ts
