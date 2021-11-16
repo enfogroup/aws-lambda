@@ -1,6 +1,6 @@
 # Introduction
 
-This package exposes functionality related to simplifying the process of working with AWS Lambda and API Gateway. In particular the response flow.
+This package exposes functionality for simplifying the process of working with AWS Lambda and API Gateway. In particular the response flow.
 
 ## Installation
 
