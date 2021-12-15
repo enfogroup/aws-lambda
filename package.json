@@ -26,8 +26,8 @@
   "license": "MIT",
   "homepage": "https://github.com/enfogroup/aws-lambda#readme",
   "devDependencies": {
-    "@commitlint/cli": "^13.2.0",
-    "@commitlint/config-conventional": "^13.2.0",
+    "@commitlint/cli": "^15.0.0",
+    "@commitlint/config-conventional": "^15.0.0",
     "@types/jest": "^27.0.3",
     "@types/node": "^16.11.13",
     "@typescript-eslint/eslint-plugin": "^4.32.0",
