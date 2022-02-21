@@ -80,19 +80,19 @@ export class APIGatewayHelper {
   }
 
   /**
-   * Returns the current value for header accessControlAllowOrigin
+   * Returns the current value for header access-control-allow-origin
    */
   public getAccessControlAllowOriginHeader (): string {
     return this.accessControlAllowOrigin
   }
 
   /**
-   * Returns the current default headers, including accessControlAllowOrigin
+   * Returns the current default headers, including access-control-allow-origin
    */
   public getDefaultHeaders (): Headers {
     return {
       ...this.defaultHeaders,
-      accessControlAllowOrigin: this.accessControlAllowOrigin
+      'access-control-allow-origin': this.accessControlAllowOrigin
     }
   }
 

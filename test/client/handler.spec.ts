@@ -40,7 +40,7 @@ describe('APIGatewayHelper', () => {
       const output = instance.getDefaultHeaders()
 
       expect(output).toEqual({
-        accessControlAllowOrigin: '*'
+        'access-control-allow-origin': '*'
       })
     })
 
@@ -50,7 +50,7 @@ describe('APIGatewayHelper', () => {
       const output = instance.getDefaultHeaders()
 
       expect(output).toEqual({
-        accessControlAllowOrigin: '*',
+        'access-control-allow-origin': '*',
         a: '42',
         b: 'answer'
       })
