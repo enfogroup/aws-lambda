@@ -242,7 +242,7 @@ export class APIGatewayHelper {
    */
   public handleError<T> (err: APIGatewayHandlerError<T> | Error, errorMessage: string): HandlerResponse {
     this.logWarning(err)
-    if (err.constructor === APIGatewayHandlerError) {
+    if (err instanceof APIGatewayHandlerError) {
       return this.buildCustomResponse(err.response)
     }
     this.logError(errorMessage)
