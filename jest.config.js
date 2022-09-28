@@ -29,6 +29,5 @@ module.exports = {
     'lcov',
     'text'
   ],
-  setupFiles: ['dotenv/config'],
   verbose: true
 }

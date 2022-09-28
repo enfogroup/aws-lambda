@@ -1,6 +1,5 @@
 const path = require('path')
 const TsConfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
-const DotenvPlugin = require('dotenv-webpack')
 const CopyPlugin = require('copy-webpack-plugin')
 
 module.exports = {
@@ -33,7 +32,6 @@ module.exports = {
     ]
   },
   plugins: [
-    new DotenvPlugin(),
     new CopyPlugin({
       patterns: [
         {
