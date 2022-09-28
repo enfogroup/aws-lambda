@@ -10,8 +10,8 @@
     "publish:package": "cd .dist && npm publish",
     "build": "npx webpack",
     "test": "npx jest --runInBand",
-    "lint": "npx eslint 'src/**/*.ts' 'test/**/*.ts'",
-    "lint:fix": "npx eslint --fix 'src/**/*.ts' 'test/**/*.ts'"
+    "lint": "npx eslint --ext .ts .",
+    "lint:fix": "npx eslint --fix --ext .ts ."
   },
   "repository": {
     "type": "git",
